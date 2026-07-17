@@ -1,0 +1,44 @@
+name: Build Windows Executable
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: # Allows you to manually trigger the build
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' # Change to your preferred Python version
+        cache: 'pip'          # Speeds up subsequent workflow runs
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+        # Install your app dependencies if you have a requirements file:
+        # pip install -r requirements.txt 
+
+    - name: Build executable with PyInstaller
+      run: |
+        pyinstaller --onefile --clean main.py
+        # Options used:
+        # --onefile: Bundles everything into a single standalone .exe
+        # --clean: Cleans PyInstaller cache before building
+        # Change "main.py" to your script's entry point file name
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Windows-Executable
+        path: dist/*.exe
+
